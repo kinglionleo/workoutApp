@@ -1,13 +1,29 @@
-import React, { useState } from 'react';
-import { TextField, Button, Typography, Container, Paper } from '@mui/material';
+import React, { useState, useContext } from 'react';
+import { TextField, Button, Typography, Container, Paper, Link } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext';
+import axios from 'axios';
 
-const RegisterPage = ({ onRegister }) => {
+const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { setIsLoggedIn } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const handleSignup = async (event) => {
     event.preventDefault();
-    onRegister(email, password);
+
+    try {
+      const response = await axios.post('http://localhost:5000/user/register', {
+        username: email,
+        password
+      });
+      localStorage.setItem('userToken', response.data.token); // Assuming the token is returned upon registration
+      setIsLoggedIn(true); // Update login state
+      navigate('/'); // Redirect to landing page
+    } catch (error) {
+      console.error('Error during registration:', error);
+    }
   };
 
   return (
@@ -16,7 +32,7 @@ const RegisterPage = ({ onRegister }) => {
         <Typography component="h1" variant="h5">
           Sign up
         </Typography>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSignup}>
           <TextField
             variant="outlined"
             margin="normal"
@@ -48,6 +64,10 @@ const RegisterPage = ({ onRegister }) => {
           >
             Sign Up
           </Button>
+          <Typography variant="body2" style={{ marginTop: '10px', textAlign: 'center' }}>
+            Already have an account? 
+            <Link href="/login" style={{ marginLeft: '5px' }}>Log in here</Link>
+          </Typography>
         </form>
       </Paper>
     </Container>

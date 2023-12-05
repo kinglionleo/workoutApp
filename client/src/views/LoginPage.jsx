@@ -1,13 +1,30 @@
-import React, { useState } from 'react';
-import { TextField, Button, Typography, Container, Paper } from '@mui/material';
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext';
+import { TextField, Button, Typography, Container, Paper, Link } from '@mui/material';
+import axios from 'axios';
 
-const LoginPage = ({ onLogin }) => {
+const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { setIsLoggedIn } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const handleLogin = async (event) => {
     event.preventDefault();
-    onLogin(email, password);
+
+    try {
+      const response = await axios.post('http://localhost:5000/user/login', {
+        username: email,
+        password
+      });
+      localStorage.setItem('userToken', response.data.token); // Assuming the token is returned upon registration
+      setIsLoggedIn(true); // Update login state
+      navigate('/'); // Redirect to landing page
+    } catch (error) {
+      console.error('Login failed:', error);
+      // Handle login failure
+    }
   };
 
   return (
@@ -16,7 +33,7 @@ const LoginPage = ({ onLogin }) => {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleLogin}>
           <TextField
             variant="outlined"
             margin="normal"
@@ -48,6 +65,10 @@ const LoginPage = ({ onLogin }) => {
           >
             Sign In
           </Button>
+          <Typography variant="body2" style={{ marginTop: '10px', textAlign: 'center' }}>
+            Don't have an account? 
+            <Link href="/register" style={{ marginLeft: '5px' }}>Sign up here</Link>
+          </Typography>
         </form>
       </Paper>
     </Container>
