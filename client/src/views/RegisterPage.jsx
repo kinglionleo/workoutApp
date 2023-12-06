@@ -7,7 +7,7 @@ import axios from 'axios';
 const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { setIsLoggedIn } = useContext(AuthContext);
+  const { setIsLoggedIn, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSignup = async (event) => {
@@ -18,8 +18,11 @@ const RegisterPage = () => {
         username: email,
         password
       });
-      localStorage.setItem('userToken', response.data.token); // Assuming the token is returned upon registration
-      setIsLoggedIn(true); // Update login state
+      const { token } = response.data;
+      localStorage.setItem('userToken', token);
+      localStorage.setItem('username', email);
+      setIsLoggedIn(true);
+      setUser({ username: email, token });
       navigate('/'); // Redirect to landing page
     } catch (error) {
       console.error('Error during registration:', error);
