@@ -37,4 +37,22 @@ router.get('/fetchExercises', authenticateToken, async (req, res) => {
     }
 });
 
+
+// Update Exercise
+router.put('/updateExercise/:id', authenticateToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name, type, target } = req.body;
+  
+      const exercise = await Exercise.findByIdAndUpdate(id, { name, type, target }, { new: true });
+      if (!exercise) {
+        return res.status(404).json({ message: 'Exercise not found' });
+      }
+  
+      res.json(exercise);
+    } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
 module.exports = router;
