@@ -6,6 +6,7 @@ import axios from 'axios';
 const ExercisePage = () => {
   const { user } = useContext(AuthContext);
   const [exercises, setExercises] = useState([]);
+  const [sets, setSets] = useState([]);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [name, setName] = useState('');
   const [type, setType] = useState('');
@@ -38,21 +39,37 @@ const ExercisePage = () => {
     fetchExercises();
   }, [user]);
 
-  const handleSelectExercise = (exercise) => {
+  const handleSelectExercise = async (exercise) => {
     if (selectedExercise && selectedExercise._id === exercise._id) {
       setSelectedExercise(null);
-      // Clear form fields
+      // Clear form fields and sets
       setName('');
       setType('');
       setTarget('');
+      setSets([]);
     } else {
       setSelectedExercise(exercise);
       // Update form fields
       setName(exercise.name);
       setType(exercise.type);
       setTarget(exercise.target);
+  
+      // Fetch sets for the selected exercise
+      try {
+        const response = await axios.get(`http://localhost:5000/set/fetchSetsByExercise/${exercise._id}`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            'username': user.username
+          }
+        });
+        setSets(response.data);
+      } catch (error) {
+        console.error('Error fetching sets:', error);
+        setSets([]);
+      }
     }
   };
+  
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
@@ -91,6 +108,32 @@ const ExercisePage = () => {
       console.error('There was an error submitting the exercise:', error);
     }
   };
+
+  const handleDeleteExercise = async () => {
+    if (!selectedExercise) {
+      console.error('No exercise selected');
+      return;
+    }
+  
+    try {
+      await axios.delete(`http://localhost:5000/exercise/deleteExercise/${selectedExercise._id}`, {
+        headers: {
+          Authorization: `Bearer ${user.token}`
+        }
+      });
+  
+      // Refresh the exercises list after deletion
+      fetchExercises();
+      // Reset the form
+      setSelectedExercise(null);
+      setName('');
+      setType('');
+      setTarget('');
+    } catch (error) {
+      console.error('There was an error deleting the exercise:', error);
+    }
+  };
+  
 
   return (
     <Container component="main" maxWidth="lg">
@@ -176,6 +219,30 @@ const ExercisePage = () => {
                 {selectedExercise ? "Update Exercise" : "Create Exercise"}
               </Button>
             </form>
+            {selectedExercise && (
+              <Button
+                fullWidth
+                variant="contained"
+                color="secondary"
+                style={{ marginTop: '10px' }}
+                onClick={handleDeleteExercise}
+              >
+                Delete Exercise
+              </Button>
+            )}
+            {selectedExercise && (
+              <>
+                <Typography variant="h6" style={{ marginTop: '20px' }}>Sets</Typography>
+                {sets.map((set, index) => (
+                  <div key={index} style={{ marginBottom: '10px' }}>
+                    <Typography variant="body1">Weight: {set.weight}</Typography>
+                    <Typography variant="body1">Reps: {set.reps}</Typography>
+                    <Typography variant="body1">Date: {new Date(set.timeCompleted).toLocaleDateString()}</Typography>
+                    {/* Add more details as needed */}
+                  </div>
+                ))}
+              </>
+            )}
           </Paper>
         </Grid>
       </Grid>

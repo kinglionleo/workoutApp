@@ -59,4 +59,30 @@ router.get('/fetchSetsByUser/:username', authenticateToken, async (req, res) => 
     }
 });
 
+// Fetch Sets for a Given Exercise and User within a Date Range
+router.get('/fetchSetsByExercise/:exerciseId', authenticateToken, async (req, res) => {
+    try {
+        const { exerciseId } = req.params;
+        const { startDate, endDate } = req.query; // Get start and end dates from query parameters
+        const username = req.headers['username']; // Get username from request headers
+
+        // Convert dates to ISO format if necessary
+        const startIsoDate = new Date(startDate).toISOString();
+        const endIsoDate = new Date(endDate).toISOString();
+
+        const sets = await Set.find({
+            exerciseId,
+            username, // Filter by username
+            timeCompleted: {
+                $gte: startIsoDate,
+                $lte: endIsoDate
+            }
+        });
+
+        res.json(sets);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 module.exports = router;

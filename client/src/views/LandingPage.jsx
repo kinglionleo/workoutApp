@@ -1,27 +1,44 @@
 import React, { useState } from 'react';
-import { AppBar, Tabs, Tab } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import ExercisePage from './ExercisePage';
 import WorkoutPage from './WorkoutPage';
+import ReportPage from './ReportPage';
 
 const LandingPage = () => {
-  const [activeTab, setActiveTab] = useState('exercise'); // default to 'exercise'
-
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
-  };
+  const [activeTab, setActiveTab] = useState('exercise');
 
   return (
-    <div>
-      <AppBar position="static">
-        <Tabs value={activeTab} onChange={handleTabChange}>
-          <Tab label="Exercise" value="exercise" />
-          <Tab label="Workout" value="workout" />
-        </Tabs>
-      </AppBar>
+    <Box sx={{ flexGrow: 1 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 2, bgcolor: 'background.paper' }}>
+        <Button
+          variant={activeTab === 'exercise' ? 'contained' : 'outlined'}
+          onClick={() => setActiveTab('exercise')}
+          sx={{ mx: 1 }}
+        >
+          Exercises
+        </Button>
+        <Button
+          variant={activeTab === 'workout' ? 'contained' : 'outlined'}
+          onClick={() => setActiveTab('workout')}
+          sx={{ mx: 1 }}
+        >
+          Workout
+        </Button>
+        <Button
+          variant={activeTab === 'report' ? 'contained' : 'outlined'}
+          onClick={() => setActiveTab('report')}
+          sx={{ mx: 1 }}
+        >
+          Report
+        </Button>
+      </Box>
 
-      {activeTab === 'exercise' && <ExercisePage />}
-      {activeTab === 'workout' && <WorkoutPage />}
-    </div>
+      <Box sx={{ mt: 3 }}>
+        {activeTab === 'exercise' && <ExercisePage />}
+        {activeTab === 'workout' && <WorkoutPage />}
+        {activeTab === 'report' && <ReportPage />}
+      </Box>
+    </Box>
   );
 };
 
